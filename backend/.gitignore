@@ -1,0 +1,28 @@
+# Backend .gitignore
+
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment files
+.env
+*.env
+
+# SQLite local database (if created)
+*.sqlite3
+*.db
+
+# Django static & media uploads
+staticfiles/
+media/
