@@ -22,3 +22,4 @@ def health_check(request):
         },
         status=status.HTTP_200_OK
     )
+

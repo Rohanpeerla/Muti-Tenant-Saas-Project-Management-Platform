@@ -26,3 +26,4 @@ htmlcov/
 # Django static & media uploads
 staticfiles/
 media/
+

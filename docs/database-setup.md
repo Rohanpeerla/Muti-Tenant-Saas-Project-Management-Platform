@@ -75,3 +75,4 @@ Once your database is created and credentials are set in `backend/.env`, execute
 cd backend
 .\venv\Scripts\python.exe manage.py migrate
 ```
+

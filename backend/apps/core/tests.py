@@ -17,3 +17,4 @@ class HealthCheckTests(TestCase):
                 "message": "Project Management API is running"
             }
         )
+
