@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { checkHealth } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
+  const { isAuthenticated } = useAuth();
   const [healthStatus, setHealthStatus] = useState({
     loading: true,
     data: null,
@@ -34,201 +37,197 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 selection:bg-indigo-500 selection:text-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
-        <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-          <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500 to-sky-400 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
-        </div>
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+      {/* Background Ambient Lighting */}
+      <div className="absolute top-0 inset-x-0 h-[600px] bg-gradient-to-b from-indigo-900/30 via-purple-900/20 to-transparent pointer-events-none blur-3xl -z-10" />
 
+      {/* Hero Section */}
+      <section className="relative overflow-hidden pt-16 pb-24 lg:pt-28 lg:pb-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60 mb-6 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-            Stage 1: Production Foundation Active
+          
+          {/* Release Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 mb-8 shadow-lg shadow-indigo-500/10">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>SprintSync 1.0 Production Platform • Multi-Tenant SaaS</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
-            The Enterprise <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-sky-600">Multi-Tenant</span> SaaS Project Platform
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.1] max-w-5xl mx-auto">
+            The Modern <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-fuchsia-400">Multi-Tenant</span> SaaS Project Suite
           </h1>
 
-          <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Manage organizations, projects, agile sprints, and cross-functional teams in an isolated, high-performance architecture built for scale.
+          <p className="mt-6 text-lg sm:text-xl text-slate-300/90 max-w-3xl mx-auto leading-relaxed font-normal">
+            High-performance agile issue tracking, interactive drag-and-drop Kanban boards, sprint lifecycle management, team collaboration, and Stripe billing built on PostgreSQL & Django 6.
           </p>
 
           {/* Action CTAs */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              type="button"
-              className="w-full sm:w-auto px-6 py-3.5 text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-lg shadow-indigo-200 transition-all cursor-pointer"
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-950 bg-gradient-to-r from-cyan-400 via-indigo-400 to-fuchsia-400 hover:opacity-95 rounded-2xl shadow-xl shadow-indigo-500/25 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 hover:scale-105"
+              >
+                <span>Open Project Dashboard</span>
+                <span>→</span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/register"
+                  className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-950 bg-gradient-to-r from-cyan-400 via-indigo-400 to-fuchsia-400 hover:opacity-95 rounded-2xl shadow-xl shadow-indigo-500/25 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 hover:scale-105"
+                >
+                  <span>Start Free Workspace</span>
+                  <span>→</span>
+                </Link>
+                <Link
+                  to="/login"
+                  className="w-full sm:w-auto px-8 py-4 text-sm font-semibold text-slate-200 hover:text-white bg-slate-900/80 hover:bg-slate-800/80 rounded-2xl border border-white/10 shadow-lg transition-all cursor-pointer"
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
+            <Link
+              to="/pricing"
+              className="w-full sm:w-auto px-6 py-4 text-sm font-medium text-slate-400 hover:text-indigo-300 transition-colors"
             >
-              Get Started Free
-            </button>
-            <button
-              type="button"
-              className="w-full sm:w-auto px-6 py-3.5 text-base font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 shadow-sm transition-all cursor-pointer"
-            >
-              Platform Overview
-            </button>
+              View Plans & Limits
+            </Link>
           </div>
 
-          {/* Live Backend Connection Status Card */}
-          <div id="status" className="mt-12 max-w-xl mx-auto">
-            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-md text-left transition-all">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Backend API Connection</span>
-                </div>
+          {/* Live API Health Diagnostic Card */}
+          <div className="mt-14 max-w-lg mx-auto">
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md text-left transition-all">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                <span className="text-3xs font-bold uppercase tracking-wider text-slate-400">Live API Health Engine</span>
                 <button
                   type="button"
                   onClick={fetchHealth}
                   disabled={healthStatus.loading}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline disabled:opacity-50 cursor-pointer"
+                  className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 disabled:opacity-50 cursor-pointer"
                 >
-                  {healthStatus.loading ? 'Pinging...' : 'Ping Again'}
+                  {healthStatus.loading ? 'Pinging...' : 'Ping Diagnostic'}
                 </button>
               </div>
 
-              <div className="mt-3 flex items-start justify-between gap-4">
+              <div className="mt-3 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  {healthStatus.loading ? (
-                    <div className="w-4 h-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></div>
-                  ) : healthStatus.data ? (
-                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-300"></div>
-                  ) : (
-                    <div className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-sm shadow-rose-300"></div>
-                  )}
-
+                  <div className={`w-3 h-3 rounded-full ${
+                    healthStatus.loading
+                      ? 'bg-amber-400 animate-spin'
+                      : healthStatus.data
+                      ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50'
+                      : 'bg-rose-500'
+                  }`} />
                   <div>
-                    <div className="text-sm font-semibold text-slate-800">
+                    <div className="text-xs font-bold text-white">
                       {healthStatus.loading
-                        ? 'Verifying API connectivity...'
+                        ? 'Verifying Django REST connection...'
                         : healthStatus.data
-                        ? healthStatus.data.message || 'API is online'
-                        : 'Cannot reach Django backend'}
+                        ? 'Django 6 Backend Connected'
+                        : 'Cannot reach Django API'}
                     </div>
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      Endpoint: <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700">GET /api/health/</code>
-                      {healthStatus.timestamp && ` • Last ping: ${healthStatus.timestamp}`}
+                    <div className="text-3xs text-slate-400 font-mono mt-0.5">
+                      GET /api/health/?detailed=true
+                      {healthStatus.timestamp && ` • ${healthStatus.timestamp}`}
                     </div>
                   </div>
                 </div>
 
                 <span
-                  className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${
+                  className={`text-3xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider shrink-0 ${
                     healthStatus.loading
-                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                       : healthStatus.data
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                   }`}
                 >
-                  {healthStatus.loading ? 'Connecting' : healthStatus.data ? 'Connected' : 'Offline'}
+                  {healthStatus.loading ? 'Checking' : healthStatus.data ? 'Healthy' : 'Offline'}
                 </span>
               </div>
-
-              {healthStatus.error && (
-                <div className="mt-3 text-xs bg-rose-50 text-rose-700 p-2.5 rounded-lg border border-rose-200">
-                  <p className="font-semibold">Connection Note:</p>
-                  <p className="mt-0.5">Ensure the Django development server is running at <code className="font-mono">http://localhost:8000</code>.</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature Highlights Section */}
-      <section id="features" className="py-16 bg-white border-y border-slate-200">
+      {/* Feature Showcase Grid */}
+      <section id="features" className="py-20 bg-slate-900/50 border-y border-white/5 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Core Capabilities</h2>
-            <p className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
-              Engineered for Modern Engineering & Product Teams
+            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-400">Engineered Architecture</h2>
+            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Enterprise Project Management Capabilities
             </p>
-            <p className="mt-4 text-base text-slate-600">
-              A comprehensive multi-tenant architecture designed to scale seamlessly from seed-stage teams to global enterprises.
+            <p className="mt-4 text-sm sm:text-base text-slate-400">
+              Purpose-built for agile software engineering teams demanding velocity and security.
             </p>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-200 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-5">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Tile 1 */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border border-white/10 shadow-xl hover:border-indigo-500/40 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-sky-400 flex items-center justify-center text-white text-xl mb-5 shadow-md shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                🏢
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Multi-Tenant Isolation</h3>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                Clean workspace boundaries with tenant-scoped data segmentation, organization hierarchies, and role-based access controls.
+              <h3 className="text-base font-bold text-white">Multi-Tenant Workspaces</h3>
+              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                Shared-schema PostgreSQL data isolation scoping every model to `workspace_id`. Dedicated tenant URLs, invitations, and hierarchical RBAC.
               </p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-200 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-5">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
+            {/* Tile 2 */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border border-white/10 shadow-xl hover:border-purple-500/40 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-fuchsia-400 flex items-center justify-center text-white text-xl mb-5 shadow-md shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                📊
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Agile Sprints & Kanban</h3>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                Interactive drag-and-drop task boards, backlog refinement, sprint burndown tracking, and customizable workflow states.
+              <h3 className="text-base font-bold text-white">Interactive Kanban & Sprints</h3>
+              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                Smooth drag-and-drop powered by `@dnd-kit`, custom workflow column transitions, sprint burndown velocity, and backlog planning.
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-200 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-5">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+            {/* Tile 3 */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border border-white/10 shadow-xl hover:border-cyan-500/40 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-teal-400 flex items-center justify-center text-white text-xl mb-5 shadow-md shadow-cyan-500/20 group-hover:scale-110 transition-transform">
+                💳
               </div>
-              <h3 className="text-lg font-bold text-slate-900">High-Performance APIs</h3>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                Powered by Django REST Framework and PostgreSQL with SimpleJWT token authentication, Redis caching, and Celery tasks.
+              <h3 className="text-base font-bold text-white">Stripe Billing & Quotas</h3>
+              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                Stripe Checkout sessions, Customer Portals, idempotent webhook handling, and server-side plan limit enforcement across Free, Pro, and Business tiers.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Tech Stack & Architecture Overview */}
-      <section id="architecture" className="py-16 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">System Architecture</h2>
-            <p className="mt-2 text-2xl font-extrabold text-slate-900 sm:text-3xl">
-              Production-Grade Technology Stack
-            </p>
-          </div>
-
-          <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs">
-              <div className="font-bold text-indigo-600 text-lg">React 18 + Vite</div>
-              <div className="text-xs text-slate-500 mt-1">SPA Client</div>
-            </div>
-            <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs">
-              <div className="font-bold text-indigo-600 text-lg">Django 6 + DRF</div>
-              <div className="text-xs text-slate-500 mt-1">REST API Backend</div>
-            </div>
-            <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs">
-              <div className="font-bold text-indigo-600 text-lg">PostgreSQL 16</div>
-              <div className="text-xs text-slate-500 mt-1">Relational Database</div>
-            </div>
-            <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs">
-              <div className="font-bold text-indigo-600 text-lg">Tailwind CSS</div>
-              <div className="text-xs text-slate-500 mt-1">Modern Design System</div>
-            </div>
+      {/* Tech Stack Strip */}
+      <section className="py-16 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-3xs uppercase tracking-widest text-slate-500 font-bold mb-6">
+            Core Technology Architecture
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono">
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-indigo-400">React 18</span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-sky-400">Vite 6</span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400">Django 6.0</span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400">PostgreSQL 16</span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-rose-400">Celery 5.4</span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-purple-400">Redis 7</span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-amber-400">Stripe Test Mode</span>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-8 bg-white border-t border-slate-200 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4">
-          Multi-Tenant SaaS Project Management Platform • Stage 1 Foundation Completed
+      <footer className="mt-auto py-8 bg-slate-950 border-t border-white/5 text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span>SprintSync SaaS Platform • All 9 Development Stages Completed</span>
+          <div className="flex items-center gap-4">
+            <Link to="/pricing" className="hover:text-slate-300">Pricing</Link>
+            <Link to="/login" className="hover:text-slate-300">Sign In</Link>
+            <Link to="/register" className="hover:text-slate-300">Register</Link>
+          </div>
         </div>
       </footer>
     </div>
@@ -236,4 +235,3 @@ const Home = () => {
 };
 
 export default Home;
-

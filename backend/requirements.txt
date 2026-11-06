@@ -4,3 +4,10 @@ djangorestframework-simplejwt==5.5.1
 django-cors-headers==4.9.0
 psycopg[binary]==3.3.7
 python-dotenv==1.2.4
+celery>=5.4.0
+redis>=5.0.0
+requests>=2.31.0
+packaging>=24.0
+stripe>=10.0.0
+whitenoise>=6.6.0
+gunicorn>=21.2.0

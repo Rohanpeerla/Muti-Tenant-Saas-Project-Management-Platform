@@ -1,0 +1,12 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>You've been invited to join {{ workspace_name }}</h2>
+<p>Hello {{ recipient_name }},</p>
+<p><strong>{{ inviter_name }}</strong> has invited you to collaborate in the workspace <strong>{{ workspace_name }}</strong> on SprintSync as a <strong>{{ role }}</strong>.</p>
+<p>Accept this invitation to start collaborating with your team on projects, boards, and tasks.</p>
+{% if action_url %}
+<p><a href="{{ action_url }}" class="btn">View & Accept Invitation</a></p>
+{% endif %}
+{% endblock %}
+

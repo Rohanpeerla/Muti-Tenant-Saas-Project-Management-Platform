@@ -1,0 +1,12 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Reminder: Task Due Soon [{{ issue_key }}]</h2>
+<p>Hello {{ recipient_name }},</p>
+<p>The task <strong>[{{ issue_key }}] {{ issue_title }}</strong> in project <strong>{{ project_name }}</strong> is approaching its due date.</p>
+<p><strong>Due Date:</strong> {{ due_date }}</p>
+{% if action_url %}
+<p><a href="{{ action_url }}" class="btn">View Task</a></p>
+{% endif %}
+{% endblock %}
+

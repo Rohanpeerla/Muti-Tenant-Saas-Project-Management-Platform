@@ -1,0 +1,176 @@
+# SprintSync - Multi-Tenant SaaS Project Management Platform
+# Production & Local Container Orchestration
+
+services:
+  # 1. PostgreSQL Database Service
+  db:
+    image: postgres:16-alpine
+    container_name: sprintsync_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-project_management_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-project_management_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - sprintsync_network
+
+  # 2. Redis In-Memory Broker & Cache
+  redis:
+    image: redis:7-alpine
+    container_name: sprintsync_redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel notice
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sprintsync_network
+
+  # 3. Backend Django REST Framework Service (Gunicorn + WhiteNoise)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sprintsync_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-sprintsync-prod-key-replace-me}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,frontend,0.0.0.0}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-project_management_db}
+      REDIS_URL: redis://redis:6379/0
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:80,http://localhost,http://127.0.0.1:5173,http://127.0.0.1}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:5173,http://localhost:80,http://localhost,http://127.0.0.1:5173,http://127.0.0.1}
+      RUN_MIGRATIONS: "true"
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-localhost}
+      EMAIL_PORT: ${EMAIL_PORT:-25}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-SprintSync <no-reply@sprintsync.local>}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder_key_for_testing}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder_key_for_testing}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder_for_local_dev}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:5173/billing/success?session_id={CHECKOUT_SESSION_ID}}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:5173/billing/cancel}
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 25s
+    networks:
+      - sprintsync_network
+
+  # 4. Celery Worker (Asynchronous Task Processing)
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sprintsync_celery_worker
+    restart: unless-stopped
+    command: celery -A config worker -l info --concurrency=4
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-sprintsync-prod-key-replace-me}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-project_management_db}
+      REDIS_URL: redis://redis:6379/0
+      RUN_MIGRATIONS: "false"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder_key_for_testing}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder_for_local_dev}
+    volumes:
+      - media_data:/app/media
+    networks:
+      - sprintsync_network
+
+  # 5. Celery Beat (Scheduled & Periodic Background Jobs)
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sprintsync_celery_beat
+    restart: unless-stopped
+    command: celery -A config beat -l info --schedule=/tmp/celerybeat-schedule
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-sprintsync-prod-key-replace-me}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-project_management_db}
+      REDIS_URL: redis://redis:6379/0
+      RUN_MIGRATIONS: "false"
+    networks:
+      - sprintsync_network
+
+  # 6. Production Frontend Client (Nginx SPA + Reverse Proxy)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    container_name: sprintsync_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "5173:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sprintsync_network
+
+# Persistent Data Volumes
+volumes:
+  postgres_data:
+    name: sprintsync_postgres_data
+  redis_data:
+    name: sprintsync_redis_data
+  media_data:
+    name: sprintsync_media_data
+  static_data:
+    name: sprintsync_static_data
+
+# Internal Network Isolation
+networks:
+  sprintsync_network:
+    name: sprintsync_network
+    driver: bridge
+

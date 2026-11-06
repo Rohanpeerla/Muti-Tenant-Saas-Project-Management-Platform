@@ -1,0 +1,12 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #dc2626;">Overdue Task Alert: [{{ issue_key }}]</h2>
+<p>Hello {{ recipient_name }},</p>
+<p>The task <strong>[{{ issue_key }}] {{ issue_title }}</strong> in project <strong>{{ project_name }}</strong> was due on <strong>{{ due_date }}</strong> and is currently marked as overdue.</p>
+<p>Please review and update the status or adjust the target date.</p>
+{% if action_url %}
+<p><a href="{{ action_url }}" class="btn" style="background-color: #dc2626;">Review Overdue Task</a></p>
+{% endif %}
+{% endblock %}
+

@@ -18,3 +18,12 @@ class HealthCheckTests(TestCase):
             }
         )
 
+    def test_detailed_health_check_endpoint(self):
+        response = self.client.get('/api/health/?detailed=true')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["status"], "success")
+        self.assertIn("services", data)
+        self.assertIn("database", data["services"])
+        self.assertIn("redis", data["services"])
+

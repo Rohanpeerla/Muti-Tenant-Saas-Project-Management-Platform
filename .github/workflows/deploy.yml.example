@@ -1,0 +1,64 @@
+name: SprintSync Production Deployment (CD Template)
+
+# This is a deployment pipeline template. To activate:
+# 1. Rename this file to deploy.yml
+# 2. Configure the required secrets in your GitHub repository:
+#    - PROD_SSH_HOST, PROD_SSH_USER, PROD_SSH_KEY
+#    - PROD_DEPLOY_PATH (e.g. /opt/sprintsync)
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    # Requires CI checks to pass first
+    needs: []
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        if: env.PROD_SSH_HOST != ''
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$PROD_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$PROD_SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy via Docker Compose on Host
+        if: env.PROD_SSH_HOST != ''
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_DEPLOY_PATH: ${{ secrets.PROD_DEPLOY_PATH }}
+        run: |
+          ssh "$PROD_SSH_USER@$PROD_SSH_HOST" << 'EOF'
+            cd "$PROD_DEPLOY_PATH"
+            git pull origin main
+            docker compose pull || true
+            docker compose build
+            docker compose up -d --remove-orphans
+            docker compose exec -T backend python manage.py migrate --noinput
+            docker compose exec -T backend python manage.py collectstatic --noinput
+            docker compose ps
+          EOF
+
+      - name: Post-Deployment Smoke Test
+        run: |
+          echo "Verifying service availability via public health check..."
+          # curl -f https://yourdomain.com/api/health/?detailed=true || exit 1
+

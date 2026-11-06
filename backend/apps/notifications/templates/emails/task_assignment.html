@@ -1,0 +1,17 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>New Task Assigned: [{{ issue_key }}] {{ issue_title }}</h2>
+<p>Hello {{ recipient_name }},</p>
+<p><strong>{{ assigner_name }}</strong> has assigned you to task <strong>[{{ issue_key }}] {{ issue_title }}</strong> in project <strong>{{ project_name }}</strong>.</p>
+{% if priority %}
+<p><strong>Priority:</strong> {{ priority }}</p>
+{% endif %}
+{% if due_date %}
+<p><strong>Due Date:</strong> {{ due_date }}</p>
+{% endif %}
+{% if action_url %}
+<p><a href="{{ action_url }}" class="btn">Open Task in SprintSync</a></p>
+{% endif %}
+{% endblock %}
+
